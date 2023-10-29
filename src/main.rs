@@ -71,8 +71,8 @@ enum Player {
 
 fn play() {
   // initialize game state
-let mut board = Board::new();
-let mut current_player = Player::X;
+  let mut board = Board::new();
+  let mut current_player = Player::X;
 
   // main game loop
   loop {
