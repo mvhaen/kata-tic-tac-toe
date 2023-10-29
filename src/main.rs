@@ -4,35 +4,30 @@ fn main() {
   play();
 }
 
-/// function that reads input from the cmd line and returns a tuple of (row, col)
 fn get_input(player: &Player, reader: &mut dyn BufRead) -> Result<(usize, usize), String> {
-  println!("Please enter row for player {}: ", player_to_string(*player));
-  let mut input = String::new();
-  reader.read_line(&mut input).expect("Failed to read line");
-  let row = match input.trim().parse::<usize>() {
-    Ok(num) => num,
-    Err(_) => {
-      return Err("Invalid input for row!".to_string());
+  fn get_input_for(prompt: &str, player: &Player, reader: &mut dyn BufRead) -> Result<usize, String> {
+    println!("Please enter {} for player {}: ", prompt, player_to_string(*player));
+    let mut input = String::new();
+    reader.read_line(&mut input).map_err(|e| e.to_string())?;
+    match input.trim().parse::<usize>() {
+        Ok(num) if num <= 2 => {
+            return Ok(num);
+        }
+        _ => return Err(format!("Invalid input for {}!", prompt)),
     }
-  };
-  if row > 2 {
-    return Err("Invalid input for row!".to_string());
   }
 
-  println!("Please enter col for player {}: ", player_to_string(*player));
-  let mut input = String::new();
-  reader.read_line(&mut input).expect("Failed to read line");
-  let col = match input.trim().parse::<usize>() {
-    Ok(num) => num,
-    Err(_) => {
-      return Err("Invalid input for col!".to_string());
-    }
-  };
-  if col > 2 {
-    return Err("Invalid input for col!".to_string());
+  let row = get_input_for("row", player, reader);
+  if row.is_err() {
+      return Err(row.err().unwrap());
   }
 
-  return Ok((row, col));
+  let col = get_input_for("col", player, reader);
+  if col.is_err() {
+    return Err(col.err().unwrap());
+  }
+
+  Ok((row.unwrap(), col.unwrap()))
 }
 
 fn player_to_string(player: Player) -> String {
@@ -71,8 +66,8 @@ enum Player {
 
 fn play() {
   // initialize game state
-  let mut board = Board::new();
-  let mut current_player = Player::X;
+let mut board = Board::new();
+let mut current_player = Player::X;
 
   // main game loop
   loop {
